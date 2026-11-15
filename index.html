@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="manifest" href="./manifest.json">
+  <title>Guida Trattore - Mappa di Prescrizione</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    /* SCHERMATA DI BLOCCO PER MAPPA SCADUTA */
+    #expired-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, #4a0c09 0%, #120202 80%);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 22px;
+      text-align: center;
+    }
+    .expired-box {
+      background: rgba(25, 5, 5, 0.95);
+      border: 3px solid #ff3b30;
+      border-radius: 22px;
+      padding: 28px 20px;
+      max-width: 430px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(255, 59, 48, 0.45);
+    }
+    .expired-icon {
+      font-size: 58px;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+    .expired-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ff3b30;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin: 0 0 14px 0;
+    }
+    .expired-company {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .expired-date-pill {
+      display: inline-block;
+      margin: 10px 0 16px 0;
+      padding: 8px 16px;
+      border-radius: 10px;
+      background: rgba(255, 59, 48, 0.2);
+      border: 1px solid #ff3b30;
+      color: #ff8078;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .expired-desc {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #dddddd;
+      margin: 0;
+    }
+
+    /* SCHERMATA DI AVVIO (SPLASH SCREEN A 1 TOCCO) */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 25%, #1c241e 0%, #0a0a0a 75%);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .splash-header {
+      margin-top: 8px;
+    }
+    .splash-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(52, 199, 89, 0.18);
+      border: 1px solid #34c759;
+      color: #52e575;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .splash-company {
+      margin: 14px 0 6px 0;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      line-height: 1.15;
+      color: #ffffff;
+      text-transform: uppercase;
+      word-break: break-word;
+    }
+    .splash-period {
+      font-size: 19px;
+      font-weight: 700;
+      color: #ffcc00;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .splash-validity {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.07);
+      color: #bbbbbb;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .splash-card {
+      background: rgba(25, 25, 25, 0.92);
+      border: 1px solid #333;
+      border-radius: 18px;
+      padding: 16px;
+      margin: 12px auto;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
+    }
+    .splash-stats {
+      display: flex;
+      justify-content: space-around;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #2b2b2b;
+    }
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+    }
+    .stat-lbl {
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+    }
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    .legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 2px solid #fff;
+    }
+    .legend-ha {
+      font-size: 13px;
+      color: #bbb;
+      font-weight: 600;
+    }
+    .btn-start-giant {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 22px 20px;
+      border-radius: 18px;
+      border: 2px solid #65f387;
+      background: linear-gradient(180deg, #34c759 0%, #249a41 100%);
+      color: #041d0a;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 26px rgba(52, 199, 89, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .btn-start-giant:active {
+      transform: scale(0.98);
+    }
+    .splash-footer {
+      font-size: 12px;
+      color: #777;
+      margin-top: 10px;
+    }
+
+    /* HUD SUPERIORE IN CABINA */
+    #hud {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      left: 12px;
+      right: 12px;
+      padding: 12px 14px 14px 14px;
+      background: rgba(18, 18, 18, 0.94);
+      border-radius: 16px;
+      border: 2.5px solid #444444;
+      z-index: 100;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.75);
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    #hud-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    #company-banner {
+      font-size: 12px;
+      font-weight: 800;
+      color: #cccccc;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 76%;
+    }
+    #btn-exit {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid #555;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    #zone-label {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-align: center;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin: 4px 0 8px 0;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    }
+    #info-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #cccccc;
+      font-weight: 600;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 7px;
+    }
+    .gps-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .gps-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff9f0a;
+    }
+
+    /* BARRA CONTROLLO FUORI CAMPO / SIMULAZIONE */
+    #sim-banner {
+      position: absolute;
+      top: 148px;
+      left: 12px;
+      right: 12px;
+      z-index: 95;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(35, 30, 10, 0.94);
+      border: 1.5px solid #ffcc00;
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffe066;
+    }
+    .sim-btn {
+      background: #ffcc00;
+      color: #111;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .sim-btn.secondary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid #777;
+    }
+
+    /* CANVAS A SCHERMO INTERO */
+    #canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* CONTROLLI LATERALI ZOOM E SCIA */
+    #side-controls {
+      position: absolute;
+      bottom: max(22px, env(safe-area-inset-bottom));
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 100;
+    }
+    .btn-round {
+      width: 56px;
+      height: 56px;
+      background: rgba(28, 28, 28, 0.92);
+      border: 1.5px solid #666;
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+    }
+    .btn-round:active {
+      background: #444;
+      transform: scale(0.95);
+    }
+    .btn-round.small-lbl {
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.1;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 0. SCHERMATA BLOCCO SCADENZA ("MAPPA SCADUTA — NON UTILIZZABILE") -->
+  <div id="expired-screen">
+    <div class="expired-box">
+      <div class="expired-icon">⛔</div>
+      <h1 class="expired-title">MAPPA SCADUTA — NON UTILIZZABILE</h1>
+      <div class="expired-company" id="exp-company"></div>
+      <div class="expired-date-pill" id="exp-date-info"></div>
+      <p class="expired-desc">
+        Questa mappa di prescrizione ha superato il limite di validità.<br><br>
+        Per evitare concimazioni con una mappa di un periodo non corretto, il file è stato disabilitato. Richiedi la mappa aggiornata.
+      </p>
+    </div>
+  </div>
+
+  <!-- 1. SCHERMATA DI AVVIO A 1 TOCCO -->
+  <div id="splash-screen">
+    <div class="splash-header">
+      <span class="splash-badge">Mappa di Prescrizione Offline</span>
+      <h1 class="splash-company" id="sp-company">CARICAMENTO MAPPA...</h1>
+      <div class="splash-period" id="sp-period"></div>
+      <div class="splash-validity" id="sp-validity"></div>
+    </div>
+
+    <div class="splash-card" id="sp-card">
+      <div class="splash-stats">
+        <div class="stat-box">
+          <span class="stat-val" id="sp-ha">--</span>
+          <span class="stat-lbl">Ettari Totali</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="sp-polys">--</span>
+          <span class="stat-lbl">Poligoni</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="sp-classes">--</span>
+          <span class="stat-lbl">Zone Vigoria</span>
+        </div>
+      </div>
+      <div class="legend-list" id="sp-legend"></div>
+    </div>
+
+    <div>
+      <button class="btn-start-giant" id="btn-start">
+        <span>🚜</span>
+        <span>AVVIA GUIDA TRATTORE</span>
+      </button>
+      <div class="splash-footer" id="sp-footer">
+        Tocca per attivare Schermo Intero, Schermo Sempre Acceso e GPS
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HUD OPERATIVO IN CABINA -->
+  <div id="hud">
+    <div id="hud-top-row">
+      <div id="company-banner"></div>
+      <button id="btn-exit" title="Esci dallo schermo intero">✕ ESCI</button>
+    </div>
+    <div id="zone-label" style="color: #ff9f0a;">ATTESA GPS...</div>
+    <div id="info-bar">
+      <span class="gps-pill">
+        <span class="gps-dot" id="gps-dot"></span>
+        <span id="acc-label">GPS: -- m</span>
+      </span>
+      <span id="speed-label">0.0 km/h</span>
+      <span id="coords-label">Rotta: NORD</span>
+    </div>
+  </div>
+
+  <!-- 3. BARRA SIMULAZIONE -->
+  <div id="sim-banner">
+    <span id="sim-text">Fuori campo</span>
+    <div style="display:flex; gap:6px;">
+      <button class="sim-btn" id="btn-sim-toggle">SIMULA IN CAMPO</button>
+      <button class="sim-btn secondary" id="btn-sim-drive" style="display:none;">▶ AUTO</button>
+    </div>
+  </div>
+
+  <!-- 4. PULSANTI ZOOM E SCIA -->
+  <div id="side-controls">
+    <button class="btn-round" id="zoom-in" aria-label="Ingrandisci">+</button>
+    <button class="btn-round" id="zoom-out" aria-label="Rimpicciolisci">−</button>
+    <button class="btn-round small-lbl" id="btn-clear-trail" title="Cancella scia percorso">PULISCI<br>SCIA</button>
+  </div>
+
+  <!-- 5. CANVAS CARTOGRAFICO -->
+  <canvas id="canvas"></canvas>
+
+  <script>
+    // Registrazione Service Worker HTTPS per funzionamento 100% offline in campo
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    let APP_META = null;
+    let PRESCRIPTION_DATA = [];
+    let isMapExpired = false;
+    let watchId = null;
+
+    function b64UrlToUint8Array(str) {
+      let s = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (s.length % 4) s += '=';
+      const bin = atob(s);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      return arr;
+    }
+
+    async function decodePayloadFromHash() {
+      const hash = window.location.hash ? window.location.hash.substring(1) : '';
+      const params = new URLSearchParams(hash);
+      const mComp = params.get('m');
+      const jRaw = params.get('j');
+
+      let payloadObj = null;
+
+      if (mComp && typeof DecompressionStream !== 'undefined') {
+        try {
+          const bytes = b64UrlToUint8Array(mComp);
+          const ds = new DecompressionStream('deflate-raw');
+          const writer = ds.writable.getWriter();
+          writer.write(bytes);
+          writer.close();
+          const resp = new Response(ds.readable);
+          payloadObj = await resp.json();
+        } catch (e) {}
+      }
+
+      if (!payloadObj && jRaw) {
+        try {
+          const bytes = b64UrlToUint8Array(jRaw);
+          const txt = new TextDecoder('utf-8').decode(bytes);
+          payloadObj = JSON.parse(txt);
+        } catch (e) {}
+      }
+
+      if (payloadObj) {
+        try {
+          localStorage.setItem('MAPPA_TRATTORE_CACHE_V2', JSON.stringify(payloadObj));
+        } catch (e) {}
+        return payloadObj;
+      }
+
+      // Fallback: recupera ultima mappa salvata offline sul telefono
+      try {
+        const cached = localStorage.getItem('MAPPA_TRATTORE_CACHE_V2');
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
+
+      return null;
+    }
+
+    function expandCompactPayload(payload) {
+      const styleByClass = {};
+      payload.l.forEach(item => { styleByClass[item.classe] = item; });
+      const polygons = payload.p.map(entry => {
+        const cls = entry[0];
+        const bbox = entry[1];
+        const deltaRings = entry[2];
+        const st = styleByClass[cls] || payload.l[0];
+        const rings = deltaRings.map(dr => {
+          const ring = [];
+          let curE = 0, curN = 0;
+          for (let i = 0; i < dr.length; i++) {
+            curE += dr[i][0];
+            curN += dr[i][1];
+            ring.push([curE / 10.0, curN / 10.0]);
+          }
+          return ring;
+        });
+        return {
+          classe: cls,
+          zona: st.zona,
+          fill: st.fill,
+          stroke: st.stroke,
+          hudBg: st.hudBg,
+          bbox: bbox,
+          rings: rings
+        };
+      });
+
+      const meta = {
+        azienda: payload.a,
+        mese: payload.m,
+        anno: payload.y,
+        expiresDateStr: payload.e,
+        expiresTimestampMs: payload.t,
+        expiresIso: payload.iso,
+        totalPolygons: polygons.length,
+        totalAreaHa: payload.ha,
+        bbox: payload.b,
+        center: payload.c,
+        legend: payload.l
+      };
+      return { meta, polygons };
+    }
+
+    function enforceExpirationLock(referenceMs) {
+      if (!APP_META) return false;
+      const checkMs = referenceMs || Date.now();
+      const expMs = Math.min(
+        APP_META.expiresTimestampMs,
+        new Date(APP_META.expiresIso).getTime() || APP_META.expiresTimestampMs
+      );
+      if (checkMs > expMs) {
+        isMapExpired = true;
+        PRESCRIPTION_DATA.length = 0;
+        if (watchId !== null && 'geolocation' in navigator) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+        document.getElementById('exp-company').innerText = `${APP_META.azienda} — ${APP_META.mese} ${APP_META.anno}`;
+        document.getElementById('exp-date-info').innerText = `Scaduta il ${APP_META.expiresDateStr}`;
+        document.getElementById('expired-screen').style.display = 'flex';
+        document.getElementById('splash-screen').style.display = 'none';
+        document.getElementById('hud').style.display = 'none';
+        document.getElementById('sim-banner').style.display = 'none';
+        document.getElementById('side-controls').style.display = 'none';
+        return true;
+      }
+      return false;
+    }
+
+    function wgs84ToUtm32N(lat, lon) {
+      const a = 6378137.0;
+      const f = 1 / 298.257223563;
+      const k0 = 0.9996;
+      const e = Math.sqrt(2 * f - f * f);
+      const ePrime2 = (e * e) / (1 - e * e);
+      const latRad = lat * Math.PI / 180.0;
+      const lonRad = lon * Math.PI / 180.0;
+      const lon0 = 9.0 * Math.PI / 180.0;
+      const N = a / Math.sqrt(1 - e * e * Math.sin(latRad) * Math.sin(latRad));
+      const T = Math.tan(latRad) * Math.tan(latRad);
+      const C = ePrime2 * Math.cos(latRad) * Math.cos(latRad);
+      const A = Math.cos(latRad) * (lonRad - lon0);
+      const M = a * (
+        (1 - e * e / 4 - 3 * Math.pow(e, 4) / 64 - 5 * Math.pow(e, 6) / 256) * latRad
+        - (3 * e * e / 8 + 3 * Math.pow(e, 4) / 32 + 45 * Math.pow(e, 6) / 1024) * Math.sin(2 * latRad)
+        + (15 * Math.pow(e, 4) / 256 + 45 * Math.pow(e, 6) / 1024) * Math.sin(4 * latRad)
+        - (35 * Math.pow(e, 6) / 3072) * Math.sin(6 * latRad)
+      );
+      const x = k0 * N * (
+        A + (1 - T + C) * Math.pow(A, 3) / 6
+        + (5 - 18 * T + T * T + 72 * C - 58 * ePrime2) * Math.pow(A, 5) / 120
+      ) + 500000.0;
+      const y = k0 * (
+        M + N * Math.tan(latRad) * (
+          Math.pow(A, 2) / 2
+          + (5 - T + 9 * C + 4 * C * C) * Math.pow(A, 4) / 24
+          + (61 - 58 * T + T * T + 600 * C - 330 * ePrime2) * Math.pow(A, 6) / 720
+        )
+      );
+      return { x, y };
+    }
+
+    function pointInRing(px, py, ring) {
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function findActiveZone(pt) {
+      if (isMapExpired) return null;
+      const px = pt.x, py = pt.y;
+      for (let k = 0; k < PRESCRIPTION_DATA.length; k++) {
+        const feat = PRESCRIPTION_DATA[k];
+        const b = feat.bbox;
+        if (px < b[0] || px > b[2] || py < b[1] || py > b[3]) continue;
+        if (!pointInRing(px, py, feat.rings[0])) continue;
+        let inHole = false;
+        for (let h = 1; h < feat.rings.length; h++) {
+          if (pointInRing(px, py, feat.rings[h])) {
+            inHole = true;
+            break;
+          }
+        }
+        if (!inHole) return feat;
+      }
+      return null;
+    }
+
+    function distanceToFarmMeters(pt) {
+      if (!APP_META) return 0;
+      const b = APP_META.bbox;
+      const dx = Math.max(b[0] - pt.x, 0, pt.x - b[2]);
+      const dy = Math.max(b[1] - pt.y, 0, pt.y - b[3]);
+      return Math.hypot(dx, dy);
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const hud = document.getElementById('hud');
+    const zoneLabel = document.getElementById('zone-label');
+    const accLabel = document.getElementById('acc-label');
+    const speedLabel = document.getElementById('speed-label');
+    const coordsLabel = document.getElementById('coords-label');
+    const gpsDot = document.getElementById('gps-dot');
+    const simBanner = document.getElementById('sim-banner');
+    const simText = document.getElementById('sim-text');
+    const btnSimToggle = document.getElementById('btn-sim-toggle');
+    const btnSimDrive = document.getElementById('btn-sim-drive');
+
+    let scale = 1.6;
+    let tractorPos = null;
+    let gpsAccuracy = null;
+    let currentSpeedKmh = 0.0;
+    let activeFeature = null;
+
+    let headingAnchorPos = null;
+    let targetHeadingRad = 0.0;
+    let viewHeadingRad = 0.0;
+
+    const MAX_TRAIL_POINTS = 1500;
+    const MIN_TRAIL_STEP_M = 2.0;
+    let trailPoints = [];
+
+    let isSimMode = false;
+    let isAutoDrive = false;
+
+    function updatePositionAndKinematics(newPos, accMeters, speedMs, nativeHeadingDeg) {
+      if (isMapExpired || enforceExpirationLock(Date.now())) return;
+
+      if (!tractorPos) {
+        tractorPos = { x: newPos.x, y: newPos.y };
+        headingAnchorPos = { x: newPos.x, y: newPos.y };
+        trailPoints.push([newPos.x, newPos.y]);
+      } else {
+        const dE = newPos.x - headingAnchorPos.x;
+        const dN = newPos.y - headingAnchorPos.y;
+        const distMove = Math.hypot(dE, dN);
+
+        if (distMove >= 1.8) {
+          targetHeadingRad = Math.atan2(dE, dN);
+          headingAnchorPos = { x: newPos.x, y: newPos.y };
+        } else if (nativeHeadingDeg !== null && nativeHeadingDeg !== undefined && !isNaN(nativeHeadingDeg) && speedMs && speedMs > 1.2) {
+          targetHeadingRad = nativeHeadingDeg * Math.PI / 180.0;
+        }
+
+        const lastTrail = trailPoints[trailPoints.length - 1];
+        if (!lastTrail || Math.hypot(newPos.x - lastTrail[0], newPos.y - lastTrail[1]) >= MIN_TRAIL_STEP_M) {
+          trailPoints.push([newPos.x, newPos.y]);
+          if (trailPoints.length > MAX_TRAIL_POINTS) trailPoints.shift();
+        }
+
+        tractorPos = { x: newPos.x, y: newPos.y };
+      }
+
+      gpsAccuracy = accMeters;
+      currentSpeedKmh = (speedMs !== null && speedMs !== undefined && !isNaN(speedMs) && speedMs >= 0)
+        ? (speedMs * 3.6)
+        : currentSpeedKmh;
+
+      activeFeature = findActiveZone(tractorPos);
+      updateHudUI();
+    }
+
+    function formatHeadingCardinal(rad) {
+      let deg = ((rad * 180.0 / Math.PI) % 360 + 360) % 360;
+      const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+      const idx = Math.round(deg / 45) % 8;
+      return `${Math.round(deg)}° ${dirs[idx]}`;
+    }
+
+    function updateHudUI() {
+      if (!tractorPos || isMapExpired) return;
+
+      if (activeFeature) {
+        zoneLabel.innerText = activeFeature.zona;
+        zoneLabel.style.color = activeFeature.stroke;
+        hud.style.borderColor = activeFeature.stroke;
+        hud.style.backgroundColor = activeFeature.hudBg || 'rgba(18, 18, 18, 0.94)';
+      } else {
+        zoneLabel.innerText = "FUORI ZONA";
+        zoneLabel.style.color = "#999999";
+        hud.style.borderColor = "#444444";
+        hud.style.backgroundColor = "rgba(18, 18, 18, 0.94)";
+      }
+
+      if (isSimMode) {
+        accLabel.innerText = "SIMULAZIONE";
+        gpsDot.style.background = "#ffcc00";
+      } else if (gpsAccuracy !== null) {
+        accLabel.innerText = `GPS: ±${Math.round(gpsAccuracy)} m`;
+        gpsDot.style.background = gpsAccuracy <= 8 ? "#34c759" : (gpsAccuracy <= 20 ? "#ffcc00" : "#ff3b30");
+      }
+
+      speedLabel.innerText = `${currentSpeedKmh.toFixed(1)} km/h`;
+      coordsLabel.innerText = `Rotta: ${formatHeadingCardinal(viewHeadingRad)}`;
+
+      const distFarm = distanceToFarmMeters(tractorPos);
+      if (isSimMode) {
+        simBanner.style.display = 'flex';
+        simText.innerText = "Modalità Demo (trascina mappa col dito)";
+        btnSimToggle.innerText = "📡 GPS REALE";
+        btnSimDrive.style.display = 'inline-block';
+      } else if (distFarm > 500) {
+        simBanner.style.display = 'flex';
+        const distStr = distFarm >= 1000 ? `${(distFarm / 1000).toFixed(1)} km` : `${Math.round(distFarm)} m`;
+        simText.innerText = `Sei a ${distStr} dai campi`;
+        btnSimToggle.innerText = "🚜 SIMULA IN CAMPO";
+        btnSimDrive.style.display = 'none';
+      } else {
+        simBanner.style.display = 'none';
+      }
+    }
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function shortestAngleDiff(target, current) {
+      return Math.atan2(Math.sin(target - current), Math.cos(target - current));
+    }
+
+    function renderLoop() {
+      if (isMapExpired) return;
+
+      const diff = shortestAngleDiff(targetHeadingRad, viewHeadingRad);
+      if (Math.abs(diff) > 0.001) {
+        viewHeadingRad += diff * 0.18;
+      } else {
+        viewHeadingRad = targetHeadingRad;
+      }
+
+      if (isSimMode && isAutoDrive && tractorPos && APP_META) {
+        const stepM = 0.08;
+        const nextE = tractorPos.x + Math.sin(targetHeadingRad) * stepM;
+        const nextN = tractorPos.y + Math.cos(targetHeadingRad) * stepM;
+        const b = APP_META.bbox;
+        if (nextE < b[0] - 40 || nextE > b[2] + 40 || nextN < b[1] - 40 || nextN > b[3] + 40) {
+          const toCenterE = APP_META.center[0] - tractorPos.x;
+          const toCenterN = APP_META.center[1] - tractorPos.y;
+          targetHeadingRad = Math.atan2(toCenterE, toCenterN);
+        }
+        currentSpeedKmh = 12.5;
+        updatePositionAndKinematics({ x: nextE, y: nextN }, 2.0, 3.47, null);
+      }
+
+      drawScene();
+      requestAnimationFrame(renderLoop);
+    }
+
+    function drawScene() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!tractorPos || isMapExpired) return;
+
+      const cx = w * 0.5;
+      const cy = h * 0.62;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-viewHeadingRad);
+
+      drawMetricGrid(w, h);
+
+      for (let k = 0; k < PRESCRIPTION_DATA.length; k++) {
+        const feat = PRESCRIPTION_DATA[k];
+        ctx.beginPath();
+        for (let r = 0; r < feat.rings.length; r++) {
+          const ring = feat.rings[r];
+          for (let i = 0; i < ring.length; i++) {
+            const sx = (ring[i][0] - tractorPos.x) * scale;
+            const sy = -(ring[i][1] - tractorPos.y) * scale;
+            if (i === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          }
+          ctx.closePath();
+        }
+        ctx.fillStyle = feat.fill;
+        ctx.fill('evenodd');
+        ctx.strokeStyle = feat.stroke;
+        ctx.lineWidth = (activeFeature === feat) ? 3.5 : 2.0;
+        ctx.stroke();
+      }
+
+      if (trailPoints.length > 1) {
+        ctx.save();
+        ctx.beginPath();
+        for (let i = 0; i < trailPoints.length; i++) {
+          const sx = (trailPoints[i][0] - tractorPos.x) * scale;
+          const sy = -(trailPoints[i][1] - tractorPos.y) * scale;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
+        ctx.lineWidth = Math.max(4, 3.0 * scale);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore();
+
+      if (!activeFeature) {
+        drawOutFieldPointer(cx, cy, w, h);
+      }
+
+      drawTractorCursor(cx, cy);
+      drawCompass(38, h - 105);
+      drawScaleBar(18, h - 32);
+    }
+
+    function drawMetricGrid(w, h) {
+      const stepM = scale >= 1.0 ? 50 : (scale >= 0.4 ? 100 : 250);
+      const maxRadiusM = Math.hypot(w, h) / scale;
+      const startE = Math.floor((tractorPos.x - maxRadiusM) / stepM) * stepM;
+      const endE = Math.ceil((tractorPos.x + maxRadiusM) / stepM) * stepM;
+      const startN = Math.floor((tractorPos.y - maxRadiusM) / stepM) * stepM;
+      const endN = Math.ceil((tractorPos.y + maxRadiusM) / stepM) * stepM;
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let e = startE; e <= endE; e += stepM) {
+        const sx = (e - tractorPos.x) * scale;
+        ctx.moveTo(sx, -maxRadiusM * scale);
+        ctx.lineTo(sx, maxRadiusM * scale);
+      }
+      for (let n = startN; n <= endN; n += stepM) {
+        const sy = -(n - tractorPos.y) * scale;
+        ctx.moveTo(-maxRadiusM * scale, sy);
+        ctx.lineTo(maxRadiusM * scale, sy);
+      }
+      ctx.stroke();
+    }
+
+    function drawTractorCursor(cx, cy) {
+      if (gpsAccuracy && gpsAccuracy < 50) {
+        const rPx = gpsAccuracy * scale;
+        if (rPx > 18) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, rPx, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 22);
+      ctx.lineTo(cx, cy - 95);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 34, cy);
+      ctx.lineTo(cx + 34, cy);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.beginPath();
+      ctx.moveTo(0, -20);
+      ctx.lineTo(15, 14);
+      ctx.lineTo(0, 7);
+      ctx.lineTo(-15, 14);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = activeFeature ? activeFeature.stroke : '#ff9f0a';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCompass(x, y) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.beginPath();
+      ctx.arc(0, 0, 24, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(22, 22, 22, 0.9)';
+      ctx.fill();
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.rotate(-viewHeadingRad);
+      ctx.beginPath();
+      ctx.moveTo(0, -18);
+      ctx.lineTo(6, 2);
+      ctx.lineTo(-6, 2);
+      ctx.closePath();
+      ctx.fillStyle = '#ff3b30';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(0, 16);
+      ctx.lineTo(5, 2);
+      ctx.lineTo(-5, 2);
+      ctx.closePath();
+      ctx.fillStyle = '#888';
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('N', 0, -6);
+      ctx.restore();
+    }
+
+    function drawScaleBar(x, y) {
+      const targetPx = 90;
+      const rawM = targetPx / scale;
+      const niceSteps = [5, 10, 20, 50, 100, 200, 500, 1000];
+      let barM = niceSteps[0];
+      for (const s of niceSteps) {
+        if (rawM >= s * 0.6) barM = s;
+      }
+      const barPx = barM * scale;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(18, 18, 18, 0.85)';
+      ctx.fillRect(x - 6, y - 22, barPx + 16, 28);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 5);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + barPx, y);
+      ctx.lineTo(x + barPx, y - 5);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText(barM >= 1000 ? `${barM/1000} km` : `${barM} m`, x + 4, y - 8);
+      ctx.restore();
+    }
+
+    function drawOutFieldPointer(cx, cy, w, h) {
+      if (!APP_META) return;
+      let minDist = Infinity;
+      let bestPt = APP_META.center;
+      for (let k = 0; k < PRESCRIPTION_DATA.length; k++) {
+        const ring = PRESCRIPTION_DATA[k].rings[0];
+        for (let i = 0; i < ring.length; i += 2) {
+          const d = Math.hypot(ring[i][0] - tractorPos.x, ring[i][1] - tractorPos.y);
+          if (d < minDist) {
+            minDist = d;
+            bestPt = ring[i];
+          }
+        }
+      }
+      if (minDist < 15) return;
+
+      const dE = bestPt[0] - tractorPos.x;
+      const dN = bestPt[1] - tractorPos.y;
+      const bearingToField = Math.atan2(dE, dN);
+      const relAngle = bearingToField - viewHeadingRad;
+
+      const radius = Math.min(w, h) * 0.34;
+      const px = cx + Math.sin(relAngle) * radius;
+      const py = cy - Math.cos(relAngle) * radius;
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(relAngle);
+      ctx.beginPath();
+      ctx.moveTo(0, -14);
+      ctx.lineTo(11, 10);
+      ctx.lineTo(-11, 10);
+      ctx.closePath();
+      ctx.fillStyle = '#ffcc00';
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      const distLbl = minDist >= 1000 ? `${(minDist/1000).toFixed(1)} km` : `${Math.round(minDist)} m`;
+      ctx.save();
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillStyle = '#ffcc00';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Campo a ${distLbl}`, px, py + 24);
+      ctx.restore();
+    }
+
+    let wakeLockSentinel = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+        }
+      } catch (e) {}
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if (!enforceExpirationLock(Date.now())) requestWakeLock();
+      }
+    });
+
+    function enterFullscreen() {
+      const el = document.documentElement;
+      try {
+        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } catch (e) {}
+    }
+
+    function exitFullscreen() {
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } catch (e) {}
+    }
+
+    function startRealGps() {
+      if (enforceExpirationLock(Date.now())) return;
+      isSimMode = false;
+      isAutoDrive = false;
+      if (watchId !== null && 'geolocation' in navigator) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+
+      zoneLabel.innerText = "RICERCA GPS...";
+      zoneLabel.style.color = "#ff9f0a";
+
+      watchId = navigator.geolocation.watchPosition(
+        pos => {
+          const gpsTimeMs = (pos && pos.timestamp) ? Math.max(Date.now(), pos.timestamp) : Date.now();
+          if (enforceExpirationLock(gpsTimeMs)) return;
+
+          const utm = wgs84ToUtm32N(pos.coords.latitude, pos.coords.longitude);
+          updatePositionAndKinematics(
+            utm,
+            pos.coords.accuracy,
+            pos.coords.speed,
+            pos.coords.heading
+          );
+        },
+        err => {
+          zoneLabel.innerText = "ATTIVA POSIZIONE GPS";
+          zoneLabel.style.color = "#ff3b30";
+          simBanner.style.display = 'flex';
+          simText.innerText = "Consenti il permesso GPS o simula:";
+          btnSimToggle.innerText = "🚜 SIMULA IN CAMPO";
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      );
+    }
+
+    function activateSimulationMode() {
+      if (enforceExpirationLock(Date.now()) || !PRESCRIPTION_DATA.length) return;
+      if (watchId !== null && 'geolocation' in navigator) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      isSimMode = true;
+      isAutoDrive = false;
+      btnSimDrive.innerText = "▶ AUTO";
+      trailPoints = [];
+
+      const firstPoly = PRESCRIPTION_DATA[0].rings[0];
+      let sumE = 0, sumN = 0;
+      for (let i = 0; i < firstPoly.length; i++) {
+        sumE += firstPoly[i][0];
+        sumN += firstPoly[i][1];
+      }
+      const startPt = {
+        x: sumE / firstPoly.length,
+        y: sumN / firstPoly.length
+      };
+      tractorPos = null;
+      targetHeadingRad = 0.35;
+      viewHeadingRad = 0.35;
+      updatePositionAndKinematics(startPt, 2.0, 0.0, null);
+    }
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      if (!APP_META || enforceExpirationLock(Date.now())) return;
+      document.getElementById('splash-screen').style.display = 'none';
+      enterFullscreen();
+      requestWakeLock();
+      try { history.pushState({ page: 'guida' }, ''); } catch (e) {}
+      startRealGps();
+    });
+
+    document.getElementById('btn-exit').addEventListener('click', () => {
+      isAutoDrive = false;
+      exitFullscreen();
+      if (!enforceExpirationLock(Date.now())) {
+        document.getElementById('splash-screen').style.display = 'flex';
+      }
+    });
+
+    window.addEventListener('popstate', () => {
+      if (document.getElementById('splash-screen').style.display === 'none') {
+        try { history.pushState({ page: 'guida' }, ''); } catch (e) {}
+      }
+    });
+
+    btnSimToggle.addEventListener('click', () => {
+      if (isSimMode) startRealGps();
+      else activateSimulationMode();
+    });
+
+    btnSimDrive.addEventListener('click', () => {
+      isAutoDrive = !isAutoDrive;
+      btnSimDrive.innerText = isAutoDrive ? "⏸ PAUSA" : "▶ AUTO";
+      if (!isAutoDrive) currentSpeedKmh = 0.0;
+    });
+
+    document.getElementById('zoom-in').addEventListener('click', () => {
+      scale = Math.min(scale * 1.35, 8.0);
+    });
+    document.getElementById('zoom-out').addEventListener('click', () => {
+      scale = Math.max(scale / 1.35, 0.12);
+    });
+    document.getElementById('btn-clear-trail').addEventListener('click', () => {
+      trailPoints = tractorPos ? [[tractorPos.x, tractorPos.y]] : [];
+    });
+
+    let isDraggingSim = false;
+    let lastTouchX = 0, lastTouchY = 0;
+    let initialPinchDist = null;
+    let initialScale = scale;
+
+    canvas.addEventListener('pointerdown', e => {
+      if (isSimMode && !isMapExpired) {
+        isDraggingSim = true;
+        isAutoDrive = false;
+        btnSimDrive.innerText = "▶ AUTO";
+        lastTouchX = e.clientX;
+        lastTouchY = e.clientY;
+      }
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (!isSimMode || !isDraggingSim || !tractorPos || isMapExpired) return;
+      const dxPx = e.clientX - lastTouchX;
+      const dyPx = e.clientY - lastTouchY;
+      lastTouchX = e.clientX;
+      lastTouchY = e.clientY;
+
+      const forwardM = -dyPx / scale;
+      const rightM = dxPx / scale;
+      const dE = rightM * Math.cos(viewHeadingRad) + forwardM * Math.sin(viewHeadingRad);
+      const dN = -rightM * Math.sin(viewHeadingRad) + forwardM * Math.cos(viewHeadingRad);
+
+      currentSpeedKmh = 9.5;
+      updatePositionAndKinematics(
+        { x: tractorPos.x + dE, y: tractorPos.y + dN },
+        2.0,
+        2.6,
+        null
+      );
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDraggingSim = false;
+      if (isSimMode && !isAutoDrive) {
+        currentSpeedKmh = 0.0;
+        updateHudUI();
+      }
+    });
+
+    canvas.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        isDraggingSim = false;
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialScale = scale;
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', e => {
+      if (e.touches.length === 2 && initialPinchDist) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        scale = Math.min(Math.max(initialScale * (dist / initialPinchDist), 0.12), 8.0);
+      }
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      initialPinchDist = null;
+    });
+
+    // Inizializzazione mappa da hash URL (#m=...) o cache offline
+    async function initBridgeApp() {
+      const payload = await decodePayloadFromHash();
+      if (!payload) {
+        document.getElementById('sp-company').innerText = "NESSUNA MAPPA CARICATA";
+        document.getElementById('sp-period').innerText = "Apri il file HTML inviato su WhatsApp/Email";
+        document.getElementById('btn-start').style.display = 'none';
+        return;
+      }
+
+      const expanded = expandCompactPayload(payload);
+      APP_META = expanded.meta;
+      PRESCRIPTION_DATA = expanded.polygons;
+
+      document.title = `${APP_META.azienda} - ${APP_META.mese} ${APP_META.anno}`;
+      document.getElementById('sp-company').innerText = APP_META.azienda;
+      document.getElementById('sp-period').innerText = `${APP_META.mese} ${APP_META.anno}`;
+      document.getElementById('sp-validity').innerText = `📅 Valida fino al ${APP_META.expiresDateStr}`;
+      document.getElementById('sp-ha').innerText = APP_META.totalAreaHa.toFixed(1);
+      document.getElementById('sp-polys').innerText = APP_META.totalPolygons;
+      document.getElementById('sp-classes').innerText = APP_META.legend.length;
+      document.getElementById('company-banner').innerText = `${APP_META.azienda} • ${APP_META.mese} ${APP_META.anno}`;
+
+      const legendContainer = document.getElementById('sp-legend');
+      legendContainer.innerHTML = '';
+      APP_META.legend.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'legend-item';
+        row.innerHTML = `
+          <div class="legend-left">
+            <span class="legend-swatch" style="background:${item.fill}; border-color:${item.stroke};"></span>
+            <span style="color:${item.stroke}">${item.zona} (Classe ${item.classe})</span>
+          </div>
+          <span class="legend-ha">${item.area_ha} ha (${item.num_poligoni} pol.)</span>
+        `;
+        legendContainer.appendChild(row);
+      });
+
+      if (!enforceExpirationLock(Date.now())) {
+        requestAnimationFrame(renderLoop);
+      }
+    }
+
+    window.addEventListener('hashchange', initBridgeApp);
+    initBridgeApp();
+  </script>
+</body>
+</html>

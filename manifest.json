@@ -1,0 +1,11 @@
+{
+  "name": "Guida Trattore - Mappe di Prescrizione",
+  "short_name": "Guida Trattore",
+  "description": "Lettore Web App 100% Offline per Mappe di Prescrizione Concimazione",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a"
+}
