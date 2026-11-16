@@ -309,43 +309,6 @@
       background: #ff9f0a;
     }
 
-    /* BARRA CONTROLLO FUORI CAMPO / SIMULAZIONE */
-    #sim-banner {
-      position: absolute;
-      top: 148px;
-      left: 12px;
-      right: 12px;
-      z-index: 95;
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background: rgba(35, 30, 10, 0.94);
-      border: 1.5px solid #ffcc00;
-      border-radius: 12px;
-      padding: 9px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffe066;
-    }
-    .sim-btn {
-      background: #ffcc00;
-      color: #111;
-      border: none;
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 12px;
-      font-weight: 900;
-      text-transform: uppercase;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .sim-btn.secondary {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      border: 1px solid #777;
-    }
-
     /* CANVAS A SCHERMO INTERO */
     #canvas {
       display: block;
@@ -462,27 +425,17 @@
     </div>
   </div>
 
-  <!-- 3. BARRA SIMULAZIONE -->
-  <div id="sim-banner">
-    <span id="sim-text">Fuori campo</span>
-    <div style="display:flex; gap:6px;">
-      <button class="sim-btn" id="btn-sim-toggle">SIMULA IN CAMPO</button>
-      <button class="sim-btn secondary" id="btn-sim-drive" style="display:none;">▶ AUTO</button>
-    </div>
-  </div>
-
-  <!-- 4. PULSANTI ZOOM E SCIA -->
+  <!-- 3. PULSANTI ZOOM E SCIA -->
   <div id="side-controls">
     <button class="btn-round" id="zoom-in" aria-label="Ingrandisci">+</button>
     <button class="btn-round" id="zoom-out" aria-label="Rimpicciolisci">−</button>
     <button class="btn-round small-lbl" id="btn-clear-trail" title="Cancella scia percorso">PULISCI<br>SCIA</button>
   </div>
 
-  <!-- 5. CANVAS CARTOGRAFICO -->
+  <!-- 4. CANVAS CARTOGRAFICO -->
   <canvas id="canvas"></canvas>
 
   <script>
-    // Registrazione Service Worker HTTPS per funzionamento 100% offline in campo
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
@@ -538,7 +491,6 @@
         return payloadObj;
       }
 
-      // Fallback: recupera ultima mappa salvata offline sul telefono
       try {
         const cached = localStorage.getItem('MAPPA_TRATTORE_CACHE_V2');
         if (cached) return JSON.parse(cached);
@@ -611,7 +563,6 @@
         document.getElementById('expired-screen').style.display = 'flex';
         document.getElementById('splash-screen').style.display = 'none';
         document.getElementById('hud').style.display = 'none';
-        document.getElementById('sim-banner').style.display = 'none';
         document.getElementById('side-controls').style.display = 'none';
         return true;
       }
@@ -682,14 +633,6 @@
       return null;
     }
 
-    function distanceToFarmMeters(pt) {
-      if (!APP_META) return 0;
-      const b = APP_META.bbox;
-      const dx = Math.max(b[0] - pt.x, 0, pt.x - b[2]);
-      const dy = Math.max(b[1] - pt.y, 0, pt.y - b[3]);
-      return Math.hypot(dx, dy);
-    }
-
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const hud = document.getElementById('hud');
@@ -698,10 +641,6 @@
     const speedLabel = document.getElementById('speed-label');
     const coordsLabel = document.getElementById('coords-label');
     const gpsDot = document.getElementById('gps-dot');
-    const simBanner = document.getElementById('sim-banner');
-    const simText = document.getElementById('sim-text');
-    const btnSimToggle = document.getElementById('btn-sim-toggle');
-    const btnSimDrive = document.getElementById('btn-sim-drive');
 
     let scale = 1.6;
     let tractorPos = null;
@@ -716,9 +655,6 @@
     const MAX_TRAIL_POINTS = 1500;
     const MIN_TRAIL_STEP_M = 2.0;
     let trailPoints = [];
-
-    let isSimMode = false;
-    let isAutoDrive = false;
 
     function updatePositionAndKinematics(newPos, accMeters, speedMs, nativeHeadingDeg) {
       if (isMapExpired || enforceExpirationLock(Date.now())) return;
@@ -751,7 +687,7 @@
       gpsAccuracy = accMeters;
       currentSpeedKmh = (speedMs !== null && speedMs !== undefined && !isNaN(speedMs) && speedMs >= 0)
         ? (speedMs * 3.6)
-        : currentSpeedKmh;
+        : 0.0;
 
       activeFeature = findActiveZone(tractorPos);
       updateHudUI();
@@ -779,32 +715,13 @@
         hud.style.backgroundColor = "rgba(18, 18, 18, 0.94)";
       }
 
-      if (isSimMode) {
-        accLabel.innerText = "SIMULAZIONE";
-        gpsDot.style.background = "#ffcc00";
-      } else if (gpsAccuracy !== null) {
+      if (gpsAccuracy !== null) {
         accLabel.innerText = `GPS: ±${Math.round(gpsAccuracy)} m`;
         gpsDot.style.background = gpsAccuracy <= 8 ? "#34c759" : (gpsAccuracy <= 20 ? "#ffcc00" : "#ff3b30");
       }
 
       speedLabel.innerText = `${currentSpeedKmh.toFixed(1)} km/h`;
       coordsLabel.innerText = `Rotta: ${formatHeadingCardinal(viewHeadingRad)}`;
-
-      const distFarm = distanceToFarmMeters(tractorPos);
-      if (isSimMode) {
-        simBanner.style.display = 'flex';
-        simText.innerText = "Modalità Demo (trascina mappa col dito)";
-        btnSimToggle.innerText = "📡 GPS REALE";
-        btnSimDrive.style.display = 'inline-block';
-      } else if (distFarm > 500) {
-        simBanner.style.display = 'flex';
-        const distStr = distFarm >= 1000 ? `${(distFarm / 1000).toFixed(1)} km` : `${Math.round(distFarm)} m`;
-        simText.innerText = `Sei a ${distStr} dai campi`;
-        btnSimToggle.innerText = "🚜 SIMULA IN CAMPO";
-        btnSimDrive.style.display = 'none';
-      } else {
-        simBanner.style.display = 'none';
-      }
     }
 
     function resizeCanvas() {
@@ -826,20 +743,6 @@
         viewHeadingRad += diff * 0.18;
       } else {
         viewHeadingRad = targetHeadingRad;
-      }
-
-      if (isSimMode && isAutoDrive && tractorPos && APP_META) {
-        const stepM = 0.08;
-        const nextE = tractorPos.x + Math.sin(targetHeadingRad) * stepM;
-        const nextN = tractorPos.y + Math.cos(targetHeadingRad) * stepM;
-        const b = APP_META.bbox;
-        if (nextE < b[0] - 40 || nextE > b[2] + 40 || nextN < b[1] - 40 || nextN > b[3] + 40) {
-          const toCenterE = APP_META.center[0] - tractorPos.x;
-          const toCenterN = APP_META.center[1] - tractorPos.y;
-          targetHeadingRad = Math.atan2(toCenterE, toCenterN);
-        }
-        currentSpeedKmh = 12.5;
-        updatePositionAndKinematics({ x: nextE, y: nextN }, 2.0, 3.47, null);
       }
 
       drawScene();
@@ -1129,8 +1032,6 @@
 
     function startRealGps() {
       if (enforceExpirationLock(Date.now())) return;
-      isSimMode = false;
-      isAutoDrive = false;
       if (watchId !== null && 'geolocation' in navigator) {
         navigator.geolocation.clearWatch(watchId);
       }
@@ -1154,39 +1055,9 @@
         err => {
           zoneLabel.innerText = "ATTIVA POSIZIONE GPS";
           zoneLabel.style.color = "#ff3b30";
-          simBanner.style.display = 'flex';
-          simText.innerText = "Consenti il permesso GPS o simula:";
-          btnSimToggle.innerText = "🚜 SIMULA IN CAMPO";
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
       );
-    }
-
-    function activateSimulationMode() {
-      if (enforceExpirationLock(Date.now()) || !PRESCRIPTION_DATA.length) return;
-      if (watchId !== null && 'geolocation' in navigator) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-      }
-      isSimMode = true;
-      isAutoDrive = false;
-      btnSimDrive.innerText = "▶ AUTO";
-      trailPoints = [];
-
-      const firstPoly = PRESCRIPTION_DATA[0].rings[0];
-      let sumE = 0, sumN = 0;
-      for (let i = 0; i < firstPoly.length; i++) {
-        sumE += firstPoly[i][0];
-        sumN += firstPoly[i][1];
-      }
-      const startPt = {
-        x: sumE / firstPoly.length,
-        y: sumN / firstPoly.length
-      };
-      tractorPos = null;
-      targetHeadingRad = 0.35;
-      viewHeadingRad = 0.35;
-      updatePositionAndKinematics(startPt, 2.0, 0.0, null);
     }
 
     document.getElementById('btn-start').addEventListener('click', () => {
@@ -1199,7 +1070,6 @@
     });
 
     document.getElementById('btn-exit').addEventListener('click', () => {
-      isAutoDrive = false;
       exitFullscreen();
       if (!enforceExpirationLock(Date.now())) {
         document.getElementById('splash-screen').style.display = 'flex';
@@ -1212,17 +1082,6 @@
       }
     });
 
-    btnSimToggle.addEventListener('click', () => {
-      if (isSimMode) startRealGps();
-      else activateSimulationMode();
-    });
-
-    btnSimDrive.addEventListener('click', () => {
-      isAutoDrive = !isAutoDrive;
-      btnSimDrive.innerText = isAutoDrive ? "⏸ PAUSA" : "▶ AUTO";
-      if (!isAutoDrive) currentSpeedKmh = 0.0;
-    });
-
     document.getElementById('zoom-in').addEventListener('click', () => {
       scale = Math.min(scale * 1.35, 8.0);
     });
@@ -1233,53 +1092,11 @@
       trailPoints = tractorPos ? [[tractorPos.x, tractorPos.y]] : [];
     });
 
-    let isDraggingSim = false;
-    let lastTouchX = 0, lastTouchY = 0;
     let initialPinchDist = null;
     let initialScale = scale;
 
-    canvas.addEventListener('pointerdown', e => {
-      if (isSimMode && !isMapExpired) {
-        isDraggingSim = true;
-        isAutoDrive = false;
-        btnSimDrive.innerText = "▶ AUTO";
-        lastTouchX = e.clientX;
-        lastTouchY = e.clientY;
-      }
-    });
-
-    canvas.addEventListener('pointermove', e => {
-      if (!isSimMode || !isDraggingSim || !tractorPos || isMapExpired) return;
-      const dxPx = e.clientX - lastTouchX;
-      const dyPx = e.clientY - lastTouchY;
-      lastTouchX = e.clientX;
-      lastTouchY = e.clientY;
-
-      const forwardM = -dyPx / scale;
-      const rightM = dxPx / scale;
-      const dE = rightM * Math.cos(viewHeadingRad) + forwardM * Math.sin(viewHeadingRad);
-      const dN = -rightM * Math.sin(viewHeadingRad) + forwardM * Math.cos(viewHeadingRad);
-
-      currentSpeedKmh = 9.5;
-      updatePositionAndKinematics(
-        { x: tractorPos.x + dE, y: tractorPos.y + dN },
-        2.0,
-        2.6,
-        null
-      );
-    });
-
-    window.addEventListener('pointerup', () => {
-      isDraggingSim = false;
-      if (isSimMode && !isAutoDrive) {
-        currentSpeedKmh = 0.0;
-        updateHudUI();
-      }
-    });
-
     canvas.addEventListener('touchstart', e => {
       if (e.touches.length === 2) {
-        isDraggingSim = false;
         initialPinchDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -1302,7 +1119,6 @@
       initialPinchDist = null;
     });
 
-    // Inizializzazione mappa da hash URL (#m=...) o cache offline
     async function initBridgeApp() {
       const payload = await decodePayloadFromHash();
       if (!payload) {
