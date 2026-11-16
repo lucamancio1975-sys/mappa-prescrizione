@@ -394,8 +394,8 @@
       margin-top: 2px;
     }
 
-    /* MODALE SALVATAGGIO / CANCELLAZIONE SCIA ("PULISCI SCIA") */
-    #trail-modal {
+    /* MODALE SALVATAGGIO / CANCELLAZIONE SCIA ("PULISCI SCIA") E USCITA ("ESCI") */
+    #trail-modal, #exit-modal {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.88);
@@ -556,6 +556,27 @@
         </button>
         <button class="btn-modal-action btn-modal-cancel" id="btn-trail-cancel">
           ↩️ ANNULLA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4B. MODALE USCITA ("✕ ESCI" -> CHIEDE SE SALVARE IL LAVORO SVOLTO) -->
+  <div id="exit-modal">
+    <div class="trail-modal-box" style="border-color: #ffcc00;">
+      <h2 class="trail-modal-title" style="color: #ffcc00;">Uscita dalla Guida</h2>
+      <p class="trail-modal-desc">
+        Prima di uscire vuoi salvare il lavoro già svolto nella cartella Download del telefono?
+      </p>
+      <div class="trail-modal-actions">
+        <button class="btn-modal-action btn-modal-save" id="btn-exit-save">
+          💾 SALVA LAVORO ED ESCI
+        </button>
+        <button class="btn-modal-action btn-modal-delete" id="btn-exit-nosave">
+          🚪 ESCI SENZA SALVARE
+        </button>
+        <button class="btn-modal-action btn-modal-cancel" id="btn-exit-cancel">
+          ↩️ ANNULLA (CONTINUA GUIDA)
         </button>
       </div>
     </div>
@@ -1182,9 +1203,11 @@
       const allSegments = savedTrails.slice();
       if (trailPoints.length > 1) {
         allSegments.push(trailPoints.slice());
+      } else if (trailPoints.length === 1 && allSegments.length === 0) {
+        allSegments.push([trailPoints[0], trailPoints[0]]);
       }
       if (allSegments.length === 0) {
-        alert("Nessuna scia presente da salvare.");
+        alert("Nessuna scia GPS registrata da salvare.");
         return;
       }
 
@@ -1411,11 +1434,34 @@
       startRealGps();
     });
 
-    document.getElementById('btn-exit').addEventListener('click', () => {
+    function performExitToSplash() {
+      if (watchId !== null && 'geolocation' in navigator) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
       exitFullscreen();
+      document.getElementById('exit-modal').style.display = 'none';
       if (!enforceExpirationLock(Date.now())) {
         document.getElementById('splash-screen').style.display = 'flex';
       }
+    }
+
+    const exitModal = document.getElementById('exit-modal');
+    document.getElementById('btn-exit').addEventListener('click', () => {
+      exitModal.style.display = 'flex';
+    });
+
+    document.getElementById('btn-exit-cancel').addEventListener('click', () => {
+      exitModal.style.display = 'none';
+    });
+
+    document.getElementById('btn-exit-save').addEventListener('click', () => {
+      exportCompletedWorkToDownload(true);
+      performExitToSplash();
+    });
+
+    document.getElementById('btn-exit-nosave').addEventListener('click', () => {
+      performExitToSplash();
     });
 
     window.addEventListener('popstate', () => {
