@@ -600,7 +600,7 @@
     // Segmenti di scia importati/salvati in precedenza + scia della sessione attiva
     let savedTrails = [];
     let trailPoints = [];
-    const MAX_TRAIL_POINTS = 2500;
+    const MAX_TRAIL_POINTS = 25000;
     const MIN_TRAIL_STEP_M = 2.0;
 
     function getTrailStorageKey() {
@@ -843,8 +843,26 @@
         }
 
         const lastTrail = trailPoints[trailPoints.length - 1];
-        if (!lastTrail || Math.hypot(newPos.x - lastTrail[0], newPos.y - lastTrail[1]) >= MIN_TRAIL_STEP_M) {
-          trailPoints.push([round2(newPos.x), round2(newPos.y)]);
+        const stepDist = lastTrail ? Math.hypot(newPos.x - lastTrail[0], newPos.y - lastTrail[1]) : Infinity;
+        if (stepDist >= MIN_TRAIL_STEP_M) {
+          const nx = round2(newPos.x), ny = round2(newPos.y);
+          // Ottimizzazione tratti rettilinei: se avanza dritto (< 4° di deviazione e < 25 m),
+          // aggiorna l'estremo del segmento senza accumulare vertici inutili
+          if (trailPoints.length >= 2) {
+            const pPrev = trailPoints[trailPoints.length - 2];
+            const pLast = trailPoints[trailPoints.length - 1];
+            const segLen = Math.hypot(nx - pPrev[0], ny - pPrev[1]);
+            const a1 = Math.atan2(pLast[0] - pPrev[0], pLast[1] - pPrev[1]);
+            const a2 = Math.atan2(nx - pLast[0], ny - pLast[1]);
+            const angDiff = Math.abs(Math.atan2(Math.sin(a2 - a1), Math.cos(a2 - a1)));
+            if (angDiff < 0.07 && segLen < 25.0) {
+              trailPoints[trailPoints.length - 1] = [nx, ny];
+            } else {
+              trailPoints.push([nx, ny]);
+            }
+          } else {
+            trailPoints.push([nx, ny]);
+          }
           if (trailPoints.length > MAX_TRAIL_POINTS) trailPoints.shift();
           saveTrailsToLocalBackup();
         }
@@ -1196,7 +1214,9 @@
       const dd = String(d.getDate()).padStart(2, '0');
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const yyyy = d.getFullYear();
-      return `${dd}-${mm}-${yyyy}`;
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}-${mm}-${yyyy}_${hh}-${min}`;
     }
 
     function exportCompletedWorkToDownload() {
