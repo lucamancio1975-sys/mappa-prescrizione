@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trattore-prescrizione-v3';
+const CACHE_NAME = 'trattore-prescrizione-v4';
 const ASSETS = [
   './',
   './index.html',
