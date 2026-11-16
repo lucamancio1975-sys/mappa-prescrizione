@@ -101,11 +101,12 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 24px 20px;
+      padding: 20px 18px;
       text-align: center;
+      overflow-y: auto;
     }
     .splash-header {
-      margin-top: 8px;
+      margin-top: 4px;
     }
     .splash-badge {
       display: inline-block;
@@ -120,8 +121,8 @@
       text-transform: uppercase;
     }
     .splash-company {
-      margin: 14px 0 6px 0;
-      font-size: 30px;
+      margin: 12px 0 4px 0;
+      font-size: 28px;
       font-weight: 900;
       letter-spacing: 0.5px;
       line-height: 1.15;
@@ -130,7 +131,7 @@
       word-break: break-word;
     }
     .splash-period {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 700;
       color: #ffcc00;
       text-transform: uppercase;
@@ -138,7 +139,7 @@
     }
     .splash-validity {
       display: inline-block;
-      margin-top: 8px;
+      margin-top: 6px;
       padding: 4px 12px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.07);
@@ -150,8 +151,8 @@
       background: rgba(25, 25, 25, 0.92);
       border: 1px solid #333;
       border-radius: 18px;
-      padding: 16px;
-      margin: 12px auto;
+      padding: 14px;
+      margin: 10px auto;
       width: 100%;
       max-width: 420px;
       box-shadow: 0 8px 28px rgba(0,0,0,0.6);
@@ -159,8 +160,8 @@
     .splash-stats {
       display: flex;
       justify-content: space-around;
-      padding-bottom: 12px;
-      margin-bottom: 12px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
       border-bottom: 1px solid #2b2b2b;
     }
     .stat-box {
@@ -181,7 +182,7 @@
     .legend-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
       text-align: left;
     }
     .legend-item {
@@ -210,11 +211,47 @@
       color: #ddd;
       font-weight: 700;
     }
+
+    /* PULSANTE IMPORTAZIONE LAVORO GIÀ SVOLTO */
+    .import-work-area {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 10px auto;
+    }
+    .btn-import-work {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1.5px dashed #00e5ff;
+      background: rgba(0, 229, 255, 0.10);
+      color: #00e5ff;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-import-work:active {
+      transform: scale(0.98);
+      background: rgba(0, 229, 255, 0.20);
+    }
+    .import-status {
+      font-size: 12px;
+      color: #52e575;
+      font-weight: 700;
+      margin-top: 5px;
+      min-height: 16px;
+    }
+
     .btn-start-giant {
       width: 100%;
       max-width: 420px;
       margin: 0 auto;
-      padding: 22px 20px;
+      padding: 20px 20px;
       border-radius: 18px;
       border: 2px solid #65f387;
       background: linear-gradient(180deg, #34c759 0%, #249a41 100%);
@@ -236,7 +273,7 @@
     .splash-footer {
       font-size: 12px;
       color: #777;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     /* LAMPEGGIAMENTO FLEBILE DI 3 SECONDI DELL'HUD IN CABINA */
@@ -356,6 +393,70 @@
       letter-spacing: 0.4px;
       margin-top: 2px;
     }
+
+    /* MODALE SALVATAGGIO / CANCELLAZIONE SCIA ("PULISCI SCIA") */
+    #trail-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .trail-modal-box {
+      background: #181818;
+      border: 2px solid #00e5ff;
+      border-radius: 20px;
+      padding: 22px 18px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.85);
+    }
+    .trail-modal-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #00e5ff;
+      text-transform: uppercase;
+      margin: 0 0 8px 0;
+    }
+    .trail-modal-desc {
+      font-size: 14px;
+      color: #cccccc;
+      line-height: 1.45;
+      margin: 0 0 18px 0;
+    }
+    .trail-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn-modal-action {
+      width: 100%;
+      padding: 15px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-modal-save {
+      background: #34c759;
+      color: #041d0a;
+    }
+    .btn-modal-delete {
+      background: rgba(255, 59, 48, 0.18);
+      border: 1.5px solid #ff3b30;
+      color: #ff6961;
+    }
+    .btn-modal-cancel {
+      background: #2c2c2c;
+      color: #dddddd;
+      border: 1px solid #555;
+    }
   </style>
 </head>
 <body>
@@ -398,6 +499,16 @@
     </div>
 
     <div>
+      <!-- TASTO IMPORTAZIONE LAVORO GIÀ SVOLTO -->
+      <div class="import-work-area">
+        <input type="file" id="file-import-trail" accept=".json,.geojson,application/json,text/*" style="display:none;">
+        <button class="btn-import-work" id="btn-import-trail">
+          <span>📂</span>
+          <span>IMPORTA LAVORO GIÀ SVOLTO</span>
+        </button>
+        <div class="import-status" id="import-status-lbl"></div>
+      </div>
+
       <button class="btn-start-giant" id="btn-start">
         <span>🚜</span>
         <span>AVVIA GUIDA TRATTORE</span>
@@ -426,10 +537,31 @@
     <button class="btn-round exit-round" id="btn-exit" title="Esci dallo schermo intero">✕<span>ESCI</span></button>
     <button class="btn-round" id="zoom-in" aria-label="Ingrandisci">+</button>
     <button class="btn-round" id="zoom-out" aria-label="Rimpicciolisci">−</button>
-    <button class="btn-round small-lbl" id="btn-clear-trail" title="Cancella scia percorso">PULISCI<br>SCIA</button>
+    <button class="btn-round small-lbl" id="btn-clear-trail" title="Salva o pulisci scia percorso">PULISCI<br>SCIA</button>
   </div>
 
-  <!-- 4. CANVAS CARTOGRAFICO -->
+  <!-- 4. MODALE PULISCI SCIA (SALVA LAVORO SVOLTO O ELIMINA PERMANENTEMENTE) -->
+  <div id="trail-modal">
+    <div class="trail-modal-box">
+      <h2 class="trail-modal-title">Gestione Scia Lavoro</h2>
+      <p class="trail-modal-desc" id="trail-modal-info">
+        Vuoi salvare il lavoro svolto nella cartella Download del telefono oppure eliminare permanentemente la scia?
+      </p>
+      <div class="trail-modal-actions">
+        <button class="btn-modal-action btn-modal-save" id="btn-trail-save">
+          💾 SALVA LAVORO IN DOWNLOAD
+        </button>
+        <button class="btn-modal-action btn-modal-delete" id="btn-trail-delete">
+          🗑️ ELIMINA PERMANENTEMENTE SCIA
+        </button>
+        <button class="btn-modal-action btn-modal-cancel" id="btn-trail-cancel">
+          ↩️ ANNULLA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CANVAS CARTOGRAFICO -->
   <canvas id="canvas"></canvas>
 
   <script>
@@ -443,6 +575,26 @@
     let PRESCRIPTION_DATA = [];
     let isMapExpired = false;
     let watchId = null;
+
+    // Segmenti di scia importati/salvati in precedenza + scia della sessione attiva
+    let savedTrails = [];
+    let trailPoints = [];
+    const MAX_TRAIL_POINTS = 2500;
+    const MIN_TRAIL_STEP_M = 2.0;
+
+    function getTrailStorageKey() {
+      if (!APP_META) return 'TRAIL_BACKUP_DEFAULT';
+      return `TRAIL_BACKUP_${APP_META.azienda}_${APP_META.mese}_${APP_META.anno}`;
+    }
+
+    function saveTrailsToLocalBackup() {
+      if (!APP_META) return;
+      try {
+        const allSegments = savedTrails.slice();
+        if (trailPoints.length > 1) allSegments.push(trailPoints.slice());
+        localStorage.setItem(getTrailStorageKey(), JSON.stringify(allSegments));
+      } catch (e) {}
+    }
 
     function b64UrlToUint8Array(str) {
       let s = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -561,6 +713,7 @@
         document.getElementById('splash-screen').style.display = 'none';
         document.getElementById('hud').style.display = 'none';
         document.getElementById('side-controls').style.display = 'none';
+        document.getElementById('trail-modal').style.display = 'none';
         return true;
       }
       return false;
@@ -649,17 +802,13 @@
     let targetHeadingRad = 0.0;
     let viewHeadingRad = 0.0;
 
-    const MAX_TRAIL_POINTS = 1500;
-    const MIN_TRAIL_STEP_M = 2.0;
-    let trailPoints = [];
-
     function updatePositionAndKinematics(newPos, accMeters, speedMs, nativeHeadingDeg) {
       if (isMapExpired || enforceExpirationLock(Date.now())) return;
 
       if (!tractorPos) {
         tractorPos = { x: newPos.x, y: newPos.y };
         headingAnchorPos = { x: newPos.x, y: newPos.y };
-        trailPoints.push([newPos.x, newPos.y]);
+        trailPoints.push([round2(newPos.x), round2(newPos.y)]);
       } else {
         const dE = newPos.x - headingAnchorPos.x;
         const dN = newPos.y - headingAnchorPos.y;
@@ -674,8 +823,9 @@
 
         const lastTrail = trailPoints[trailPoints.length - 1];
         if (!lastTrail || Math.hypot(newPos.x - lastTrail[0], newPos.y - lastTrail[1]) >= MIN_TRAIL_STEP_M) {
-          trailPoints.push([newPos.x, newPos.y]);
+          trailPoints.push([round2(newPos.x), round2(newPos.y)]);
           if (trailPoints.length > MAX_TRAIL_POINTS) trailPoints.shift();
+          saveTrailsToLocalBackup();
         }
 
         tractorPos = { x: newPos.x, y: newPos.y };
@@ -688,6 +838,10 @@
 
       activeFeature = findActiveZone(tractorPos);
       updateHudUI();
+    }
+
+    function round2(v) {
+      return Math.round(v * 100) / 100;
     }
 
     function formatHeadingCardinal(rad) {
@@ -748,6 +902,22 @@
       requestAnimationFrame(renderLoop);
     }
 
+    function drawTrailSegment(seg, color, widthPx) {
+      if (!seg || seg.length < 2) return;
+      ctx.beginPath();
+      for (let i = 0; i < seg.length; i++) {
+        const sx = (seg[i][0] - tractorPos.x) * scale;
+        const sy = -(seg[i][1] - tractorPos.y) * scale;
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = widthPx;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
     function drawScene() {
       const w = canvas.width;
       const h = canvas.height;
@@ -784,21 +954,13 @@
         ctx.stroke();
       }
 
+      // Disegno scie del lavoro già svolto (importate o salvate) + scia corrente
+      const lineW = Math.max(4, 3.0 * scale);
+      for (let s = 0; s < savedTrails.length; s++) {
+        drawTrailSegment(savedTrails[s], 'rgba(0, 229, 255, 0.78)', lineW);
+      }
       if (trailPoints.length > 1) {
-        ctx.save();
-        ctx.beginPath();
-        for (let i = 0; i < trailPoints.length; i++) {
-          const sx = (trailPoints[i][0] - tractorPos.x) * scale;
-          const sy = -(trailPoints[i][1] - tractorPos.y) * scale;
-          if (i === 0) ctx.moveTo(sx, sy);
-          else ctx.lineTo(sx, sy);
-        }
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
-        ctx.lineWidth = Math.max(4, 3.0 * scale);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-        ctx.restore();
+        drawTrailSegment(trailPoints, 'rgba(0, 229, 255, 0.92)', lineW);
       }
 
       ctx.restore();
@@ -999,6 +1161,180 @@
       ctx.restore();
     }
 
+    // =========================================================================
+    // ESPORTAZIONE IN DOWNLOAD E IMPORTAZIONE LAVORO GIÀ SVOLTO
+    // =========================================================================
+    function buildBaseFileName() {
+      if (!APP_META) return 'Mappa';
+      const clean = s => String(s).trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+      return `${clean(APP_META.azienda)}_${clean(APP_META.mese)}_${clean(APP_META.anno)}`;
+    }
+
+    function formatTodayDateForFile() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+
+    function exportCompletedWorkToDownload() {
+      const allSegments = savedTrails.slice();
+      if (trailPoints.length > 1) {
+        allSegments.push(trailPoints.slice());
+      }
+      if (allSegments.length === 0) {
+        alert("Nessuna scia presente da salvare.");
+        return;
+      }
+
+      const geojsonObj = {
+        type: "FeatureCollection",
+        name: `${buildBaseFileName()}_gia_svolto`,
+        crs: {
+          type: "name",
+          properties: { name: "urn:ogc:def:crs:EPSG::32632" }
+        },
+        metadata: {
+          azienda: APP_META ? APP_META.azienda : "",
+          mese: APP_META ? APP_META.mese : "",
+          anno: APP_META ? APP_META.anno : "",
+          savedAt: new Date().toISOString()
+        },
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              azienda: APP_META ? APP_META.azienda : "",
+              periodo: APP_META ? `${APP_META.mese} ${APP_META.anno}` : "",
+              data_salvataggio: formatTodayDateForFile()
+            },
+            geometry: {
+              type: "MultiLineString",
+              coordinates: allSegments
+            }
+          }
+        ]
+      };
+
+      const jsonString = JSON.stringify(geojsonObj, null, 2);
+      const fileName = `${buildBaseFileName()}_gia_svolto_${formatTodayDateForFile()}.json`;
+
+      // Salva anche nel backup interno del telefono
+      savedTrails = allSegments;
+      trailPoints = tractorPos ? [[round2(tractorPos.x), round2(tractorPos.y)]] : [];
+      saveTrailsToLocalBackup();
+
+      // Scarica nella cartella Download del telefono
+      try {
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1500);
+      } catch (err) {
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonString);
+        const a = document.createElement('a');
+        a.href = dataUri;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    function parseImportedTrailFile(contentStr) {
+      const obj = JSON.parse(contentStr);
+      const extracted = [];
+
+      if (obj && obj.type === "FeatureCollection" && Array.isArray(obj.features)) {
+        obj.features.forEach(feat => {
+          if (!feat || !feat.geometry) return;
+          if (feat.geometry.type === "MultiLineString" && Array.isArray(feat.geometry.coordinates)) {
+            feat.geometry.coordinates.forEach(line => {
+              if (Array.isArray(line) && line.length >= 2) extracted.push(line);
+            });
+          } else if (feat.geometry.type === "LineString" && Array.isArray(feat.geometry.coordinates)) {
+            if (feat.geometry.coordinates.length >= 2) extracted.push(feat.geometry.coordinates);
+          }
+        });
+      } else if (Array.isArray(obj)) {
+        obj.forEach(seg => {
+          if (Array.isArray(seg) && seg.length >= 2) extracted.push(seg);
+        });
+      }
+      return extracted;
+    }
+
+    // Eventi Importazione nella Schermata Iniziale
+    const fileInputTrail = document.getElementById('file-import-trail');
+    const btnImportTrail = document.getElementById('btn-import-trail');
+    const importStatusLbl = document.getElementById('import-status-lbl');
+
+    btnImportTrail.addEventListener('click', () => {
+      fileInputTrail.value = '';
+      fileInputTrail.click();
+    });
+
+    fileInputTrail.addEventListener('change', e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const segments = parseImportedTrailFile(ev.target.result);
+          if (segments.length > 0) {
+            savedTrails = segments;
+            saveTrailsToLocalBackup();
+            let totalPts = 0;
+            segments.forEach(s => { totalPts += s.length; });
+            importStatusLbl.style.color = '#52e575';
+            importStatusLbl.innerText = `✅ Caricato: ${file.name} (${totalPts} punti scia)`;
+          } else {
+            importStatusLbl.style.color = '#ff9500';
+            importStatusLbl.innerText = '⚠️ Nessuna scia valida trovata nel file selezionato.';
+          }
+        } catch (err) {
+          importStatusLbl.style.color = '#ff3b30';
+          importStatusLbl.innerText = '❌ Formato file non valido.';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Eventi Modale "PULISCI SCIA"
+    const trailModal = document.getElementById('trail-modal');
+    document.getElementById('btn-clear-trail').addEventListener('click', () => {
+      trailModal.style.display = 'flex';
+    });
+
+    document.getElementById('btn-trail-cancel').addEventListener('click', () => {
+      trailModal.style.display = 'none';
+    });
+
+    document.getElementById('btn-trail-save').addEventListener('click', () => {
+      exportCompletedWorkToDownload();
+      trailModal.style.display = 'none';
+    });
+
+    document.getElementById('btn-trail-delete').addEventListener('click', () => {
+      savedTrails = [];
+      trailPoints = tractorPos ? [[round2(tractorPos.x), round2(tractorPos.y)]] : [];
+      try { localStorage.removeItem(getTrailStorageKey()); } catch (e) {}
+      importStatusLbl.innerText = '';
+      trailModal.style.display = 'none';
+    });
+
+    // =========================================================================
+    // WAKE LOCK, FULLSCREEN E GPS
+    // =========================================================================
     let wakeLockSentinel = null;
     async function requestWakeLock() {
       try {
@@ -1034,6 +1370,13 @@
       if (watchId !== null && 'geolocation' in navigator) {
         navigator.geolocation.clearWatch(watchId);
       }
+
+      // Se l'operatore esce e rientra, archivia il segmento precedente senza unirlo con una riga dritta
+      if (trailPoints.length > 1) {
+        savedTrails.push(trailPoints.slice());
+      }
+      trailPoints = [];
+      tractorPos = null;
 
       zoneLabel.innerText = "RICERCA GPS...";
       zoneLabel.style.color = "#ff9f0a";
@@ -1086,9 +1429,6 @@
     });
     document.getElementById('zoom-out').addEventListener('click', () => {
       scale = Math.max(scale / 1.35, 0.12);
-    });
-    document.getElementById('btn-clear-trail').addEventListener('click', () => {
-      trailPoints = tractorPos ? [[tractorPos.x, tractorPos.y]] : [];
     });
 
     let initialPinchDist = null;
